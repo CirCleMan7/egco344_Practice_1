@@ -157,48 +157,6 @@
             padding-bottom: 12px;
         }
 
-        .search-box {
-            margin-bottom: 16px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.95em;
-            transition: border-color 0.2s;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #5a67d8;
-            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
-        }
-
-        .search-box button {
-            padding: 10px 20px;
-            background: #5a67d8;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .search-box button:hover {
-            background: #4c51bf;
-        }
-
-        .search-results {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 12px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -307,11 +265,6 @@
 
         <div class="table-container">
             <h2>Detailed Data Table</h2>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search by province name...">
-                <button onclick="clearSearch()">Clear</button>
-            </div>
-            <div class="search-results" id="searchResults"></div>
             <table id="dataTable">
                 <thead>
                     <tr>
@@ -354,7 +307,233 @@
                 
                 if (!usersData || usersData.length === 0) {
                     throw new Error('No data found in electricity_users_en.json');
-false,
+                }
+
+                initializeApp();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.body.innerHTML = '<div class="loading" style="padding: 40px; color: #333; background: white; margin: 20px; border-radius: 10px;"><h2>⚠️ Error loading data</h2><p>Error: ' + error.message + '</p><p>Please make sure the JSON files are in the same directory as this HTML file.</p></div>';
+            }
+        }
+
+        function initializeApp() {
+            populateProvinceSelect();
+            updateCharts();
+            updateTable();
+            document.getElementById('provinceSelect').addEventListener('change', updateCharts);
+        }
+
+        function populateProvinceSelect() {
+            const provinces = [...new Set(usageData.map(d => d.province_name))].sort();
+            const select = document.getElementById('provinceSelect');
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                select.appendChild(option);
+            });
+        }
+
+        function getSelectedProvince() {
+            return document.getElementById('provinceSelect').value;
+        }
+
+        function filterData(data, province) {
+            return province ? data.filter(d => d.province_name === province) : data;
+        }
+
+        function updateStats() {
+            const selectedProvince = getSelectedProvince();
+            const filteredUsage = filterData(usageData, selectedProvince);
+            const filteredUsers = filterData(usersData, selectedProvince);
+
+            let totalUsage = 0;
+            let totalUsers = 0;
+
+            filteredUsage.forEach(d => {
+                totalUsage += Object.values(d).filter(v => typeof v === 'number' && !isNaN(v) && 
+                    String(d).includes('kwh')).reduce((a, b) => a + b, 0);
+                // Calculate more accurately
+                const categories = Object.keys(d).filter(k => k.includes('_kwh'));
+                totalUsage += categories.reduce((sum, cat) => sum + (d[cat] || 0), 0);
+            });
+
+            filteredUsers.forEach(d => {
+                const categories = Object.keys(d).filter(k => k.includes('_count'));
+                totalUsers += categories.reduce((sum, cat) => sum + (d[cat] || 0), 0);
+            });
+
+            const statsHTML = `
+                <div class="stat-card">
+                    <h3>Total Usage</h3>
+                    <div class="stat-value">${(totalUsage / 1e9).toFixed(2)}B kWh</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <div class="stat-value">${(totalUsers / 1e6).toFixed(2)}M</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Provinces</h3>
+                    <div class="stat-value">${[...new Set(usageData.map(d => d.province_name))].length}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg per User</h3>
+                    <div class="stat-value">${totalUsers > 0 ? (totalUsage / totalUsers).toFixed(0) : 0} kWh</div>
+                </div>
+            `;
+            document.getElementById('statsContainer').innerHTML = statsHTML;
+        }
+
+        function updateCharts() {
+            const selectedProvince = getSelectedProvince();
+            updateStats();
+            createUsageByCategory(selectedProvince);
+            createTopProvinces();
+            createUsersByCategory(selectedProvince);
+            createProvinceComparison(selectedProvince);
+            createProvinceDistribution();
+        }
+
+        function createUsageByCategory(province) {
+            const data = filterData(usageData, province);
+            const categories = [
+                'residential_kwh', 'small_business_kwh', 'medium_business_kwh',
+                'large_business_kwh', 'specialized_business_kwh', 'public_electricity_kwh',
+                'government_state_enterprise_kwh', 'ev_charging_kwh'
+            ];
+
+            const categoryLabels = [
+                'Residential', 'Small Business', 'Medium Business',
+                'Large Business', 'Specialized', 'Public', 'Gov/Enterprise', 'EV Charging'
+            ];
+
+            const totals = categories.map(cat => 
+                data.reduce((sum, d) => sum + (d[cat] || 0), 0)
+            );
+
+            const ctx = document.getElementById('usageByCategory').getContext('2d');
+            if (charts.usageByCategory) charts.usageByCategory.destroy();
+
+            charts.usageByCategory = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: totals,
+                        backgroundColor: [
+                            '#5a67d8', '#f56565', '#48bb78', '#ed8936',
+                            '#9f7aea', '#38b2ac', '#ecc94b', '#ed64a6'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    return context.label + ': ' + (value / 1e9).toFixed(2) + 'B kWh';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTopProvinces() {
+            const provinceUsage = {};
+            usageData.forEach(d => {
+                if (!provinceUsage[d.province_name]) {
+                    provinceUsage[d.province_name] = 0;
+                }
+                Object.keys(d).filter(k => k.includes('_kwh')).forEach(cat => {
+                    provinceUsage[d.province_name] += d[cat] || 0;
+                });
+            });
+
+            const sorted = Object.entries(provinceUsage)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            const ctx = document.getElementById('topProvinces').getContext('2d');
+            if (charts.topProvinces) charts.topProvinces.destroy();
+
+            charts.topProvinces = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(d => d[0]),
+                    datasets: [{
+                        label: 'Total Usage (kWh)',
+                        data: sorted.map(d => d[1] / 1e9),
+                        backgroundColor: '#5a67d8',
+                        borderColor: '#4c51bf',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Usage (Billion kWh)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createUsersByCategory(province) {
+            const data = filterData(usersData, province);
+            const categories = [
+                'residential_count', 'small_business_count', 'medium_business_count',
+                'large_business_count', 'specialized_business_count', 'public_electricity_count',
+                'government_state_enterprise_count', 'ev_charging_count'
+            ];
+
+            const categoryLabels = [
+                'Residential', 'Small Business', 'Medium Business',
+                'Large Business', 'Specialized', 'Public', 'Gov/Enterprise', 'EV Charging'
+            ];
+
+            const totals = categories.map(cat => 
+                data.reduce((sum, d) => sum + (d[cat] || 0), 0)
+            );
+
+            // Create array of {label, value} and sort
+            const sorted = categoryLabels.map((label, index) => ({
+                label: label,
+                value: totals[index]
+            })).sort((a, b) => b.value - a.value);
+
+            const sortedLabels = sorted.map(item => item.label);
+            const sortedValues = sorted.map(item => item.value);
+
+            const ctx = document.getElementById('usersByCategory').getContext('2d');
+            if (charts.usersByCategory) charts.usersByCategory.destroy();
+
+            charts.usersByCategory = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        label: 'Number of Users',
+                        data: sortedValues,
+                        backgroundColor: '#f56565',
+                        borderColor: '#e53e3e',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
                         y: {
@@ -517,66 +696,19 @@ false,
                 }
             });
 
-            window.tableDataArray = Object.entries(provinceData)
+            Object.entries(provinceData)
                 .sort((a, b) => b[1].usage - a[1].usage)
-                .map(([province, data]) => ({
-                    province,
-                    usage: data.usage,
-                    users: data.users,
-                    year: data.year
-                }));
-
-            renderTableRows(window.tableDataArray);
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').textContent = '';
+                .forEach(([province, data]) => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${province}</td>
+                        <td>${(data.usage / 1e9).toFixed(3)}B</td>
+                        <td>${(data.users / 1e6).toFixed(3)}M</td>
+                        <td>${data.users > 0 ? (data.usage / data.users).toFixed(0) : 0}</td>
+                        <td>${data.year}</td>
+                    `;
+                });
         }
-
-        function renderTableRows(data) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            
-            data.forEach(item => {
-                const row = tableBody.insertRow();
-                row.innerHTML = `
-                    <td>${item.province}</td>
-                    <td>${(item.usage / 1e9).toFixed(3)}B</td>
-                    <td>${(item.users / 1e6).toFixed(3)}M</td>
-                    <td>${item.users > 0 ? (item.usage / item.users).toFixed(0) : 0}</td>
-                    <td>${item.year}</td>
-                `;
-            });
-        }
-
-        function searchTable() {
-            const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
-            
-            if (!searchValue) {
-                renderTableRows(window.tableDataArray);
-                document.getElementById('searchResults').textContent = '';
-                return;
-            }
-
-            const filtered = window.tableDataArray.filter(item => 
-                item.province.toLowerCase().includes(searchValue)
-            );
-
-            renderTableRows(filtered);
-            document.getElementById('searchResults').textContent = `Found ${filtered.length} result(s)`;
-        }
-
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').textContent = '';
-            renderTableRows(window.tableDataArray);
-        }
-
-        // Add event listener for real-time search
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('keyup', searchTable);
-            }
-        });
 
         // Load data on page load
         loadData();
