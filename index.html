@@ -277,16 +277,30 @@
         async function loadData() {
             try {
                 const usageResponse = await fetch('electricity_usages_en.json');
+                if (!usageResponse.ok) {
+                    throw new Error(`Failed to fetch electricity_usages_en.json: ${usageResponse.status}`);
+                }
                 const usageJson = await usageResponse.json();
                 usageData = usageJson.Sheet1 || [];
+                
+                if (!usageData || usageData.length === 0) {
+                    throw new Error('No data found in electricity_usages_en.json');
+                }
 
                 const usersResponse = await fetch('electricity_users_en.json');
+                if (!usersResponse.ok) {
+                    throw new Error(`Failed to fetch electricity_users_en.json: ${usersResponse.status}`);
+                }
                 usersData = await usersResponse.json();
+                
+                if (!usersData || usersData.length === 0) {
+                    throw new Error('No data found in electricity_users_en.json');
+                }
 
                 initializeApp();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.body.innerHTML = '<div class="loading">Error loading data. Please check the JSON files.</div>';
+                document.body.innerHTML = '<div class="loading" style="padding: 40px; color: #333; background: white; margin: 20px; border-radius: 10px;"><h2>⚠️ Error loading data</h2><p>Error: ' + error.message + '</p><p>Please make sure the JSON files are in the same directory as this HTML file.</p></div>';
             }
         }
 
