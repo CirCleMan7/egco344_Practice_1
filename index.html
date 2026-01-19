@@ -157,48 +157,6 @@
             padding-bottom: 12px;
         }
 
-        .search-box {
-            margin-bottom: 16px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.95em;
-            transition: border-color 0.2s;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #5a67d8;
-            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
-        }
-
-        .search-box button {
-            padding: 10px 20px;
-            background: #5a67d8;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .search-box button:hover {
-            background: #4c51bf;
-        }
-
-        .search-results {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 12px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -307,11 +265,6 @@
 
         <div class="table-container">
             <h2>Detailed Data Table</h2>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search by province name...">
-                <button onclick="clearSearch()">Clear</button>
-            </div>
-            <div class="search-results" id="searchResults"></div>
             <table id="dataTable">
                 <thead>
                     <tr>
@@ -517,66 +470,19 @@ false,
                 }
             });
 
-            window.tableDataArray = Object.entries(provinceData)
+            Object.entries(provinceData)
                 .sort((a, b) => b[1].usage - a[1].usage)
-                .map(([province, data]) => ({
-                    province,
-                    usage: data.usage,
-                    users: data.users,
-                    year: data.year
-                }));
-
-            renderTableRows(window.tableDataArray);
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').textContent = '';
+                .forEach(([province, data]) => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${province}</td>
+                        <td>${(data.usage / 1e9).toFixed(3)}B</td>
+                        <td>${(data.users / 1e6).toFixed(3)}M</td>
+                        <td>${data.users > 0 ? (data.usage / data.users).toFixed(0) : 0}</td>
+                        <td>${data.year}</td>
+                    `;
+                });
         }
-
-        function renderTableRows(data) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            
-            data.forEach(item => {
-                const row = tableBody.insertRow();
-                row.innerHTML = `
-                    <td>${item.province}</td>
-                    <td>${(item.usage / 1e9).toFixed(3)}B</td>
-                    <td>${(item.users / 1e6).toFixed(3)}M</td>
-                    <td>${item.users > 0 ? (item.usage / item.users).toFixed(0) : 0}</td>
-                    <td>${item.year}</td>
-                `;
-            });
-        }
-
-        function searchTable() {
-            const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
-            
-            if (!searchValue) {
-                renderTableRows(window.tableDataArray);
-                document.getElementById('searchResults').textContent = '';
-                return;
-            }
-
-            const filtered = window.tableDataArray.filter(item => 
-                item.province.toLowerCase().includes(searchValue)
-            );
-
-            renderTableRows(filtered);
-            document.getElementById('searchResults').textContent = `Found ${filtered.length} result(s)`;
-        }
-
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').textContent = '';
-            renderTableRows(window.tableDataArray);
-        }
-
-        // Add event listener for real-time search
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('keyup', searchTable);
-            }
-        });
 
         // Load data on page load
         loadData();
