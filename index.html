@@ -14,122 +14,126 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 40px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
+            color: #1a1a1a;
+            margin-bottom: 32px;
+            background: white;
+            padding: 32px 24px;
+            border-radius: 12px;
+            border-bottom: 2px solid #e5e5e5;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 2em;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 0.95em;
+            color: #666;
+            margin: 0;
         }
 
         .controls {
             display: flex;
             justify-content: center;
-            margin-bottom: 30px;
-            gap: 20px;
+            margin-bottom: 24px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
         .controls select {
-            padding: 12px 20px;
-            font-size: 1em;
-            border: none;
+            padding: 10px 16px;
+            font-size: 0.95em;
+            border: 1px solid #ddd;
             border-radius: 8px;
             background: white;
             color: #333;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .controls select:hover {
-            transform: translateY(-2px);
+            border-color: #999;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
         }
 
         .chart-card {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.3s;
         }
 
         .chart-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .chart-card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-size: 1.25em;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e5e5;
+            padding-bottom: 12px;
         }
 
         .chart-container {
             position: relative;
-            height: 400px;
+            height: 380px;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .stat-card {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 16px;
             text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #667eea;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border-left: 3px solid #5a67d8;
         }
 
         .stat-card h3 {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 10px;
+            color: #999;
+            font-size: 0.8em;
+            margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
         .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
+            font-size: 1.75em;
+            font-weight: 700;
+            color: #5a67d8;
         }
 
         .full-width {
@@ -138,18 +142,19 @@
 
         .table-container {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow-x: auto;
         }
 
         .table-container h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-size: 1.25em;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e5e5;
+            padding-bottom: 12px;
         }
 
         table {
@@ -158,20 +163,23 @@
         }
 
         th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
+            background: #f8f9fa;
+            color: #1a1a1a;
+            padding: 12px;
             text-align: left;
             font-weight: 600;
+            font-size: 0.9em;
+            border-bottom: 2px solid #e5e5e5;
         }
 
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
         }
 
         tr:hover {
-            background: #f5f5f5;
+            background: #fafafa;
         }
 
         @media (max-width: 768px) {
@@ -180,7 +188,7 @@
             }
 
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.5em;
             }
 
             .controls {
@@ -190,12 +198,16 @@
             .controls select {
                 width: 100%;
             }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .loading {
             text-align: center;
-            color: white;
-            font-size: 1.2em;
+            color: #333;
+            font-size: 1em;
         }
     </style>
 </head>
@@ -409,8 +421,8 @@
                     datasets: [{
                         data: totals,
                         backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                            '#5a67d8', '#718096', '#a0aec0', '#cbd5e0',
+                            '#e2e8f0', '#cbd5e0', '#a0aec0', '#718096'
                         ],
                         borderColor: '#fff',
                         borderWidth: 2
@@ -459,9 +471,9 @@
                     datasets: [{
                         label: 'Total Usage (kWh)',
                         data: sorted.map(d => d[1] / 1e9),
-                        backgroundColor: '#36A2EB',
-                        borderColor: '#2E86DE',
-                        borderWidth: 1
+                        backgroundColor: '#5a67d8',
+                        borderColor: '#4c51bf',
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -505,9 +517,9 @@
                     datasets: [{
                         label: 'Number of Users',
                         data: totals,
-                        backgroundColor: '#4BC0C0',
-                        borderColor: '#2AA8A8',
-                        borderWidth: 1
+                        backgroundColor: '#718096',
+                        borderColor: '#4a5568',
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -545,9 +557,9 @@
                         datasets: [{
                             label: 'Total Usage (kWh)',
                             data: usageByProvince.map(d => d / 1e9),
-                            backgroundColor: '#FF9F40',
-                            borderColor: '#E67E22',
-                            borderWidth: 1
+                            backgroundColor: '#a0aec0',
+                            borderColor: '#718096',
+                            borderWidth: 0
                         }]
                     },
                     options: {
@@ -599,8 +611,8 @@
                         {
                             label: 'Usage (B kWh)',
                             data: usages,
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderColor: '#5a67d8',
+                            backgroundColor: 'rgba(90, 103, 216, 0.05)',
                             tension: 0.3,
                             fill: true,
                             yAxisID: 'y'
@@ -608,8 +620,8 @@
                         {
                             label: 'Users (M)',
                             data: users,
-                            borderColor: '#ff6b6b',
-                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            borderColor: '#a0aec0',
+                            backgroundColor: 'transparent',
                             tension: 0.3,
                             fill: false,
                             yAxisID: 'y1'
