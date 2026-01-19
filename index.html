@@ -421,8 +421,8 @@
                     datasets: [{
                         data: totals,
                         backgroundColor: [
-                            '#5a67d8', '#718096', '#a0aec0', '#cbd5e0',
-                            '#e2e8f0', '#cbd5e0', '#a0aec0', '#718096'
+                            '#5a67d8', '#f56565', '#48bb78', '#ed8936',
+                            '#9f7aea', '#38b2ac', '#ecc94b', '#ed64a6'
                         ],
                         borderColor: '#fff',
                         borderWidth: 2
@@ -507,18 +507,27 @@
                 data.reduce((sum, d) => sum + (d[cat] || 0), 0)
             );
 
+            // Create array of {label, value} and sort
+            const sorted = categoryLabels.map((label, index) => ({
+                label: label,
+                value: totals[index]
+            })).sort((a, b) => b.value - a.value);
+
+            const sortedLabels = sorted.map(item => item.label);
+            const sortedValues = sorted.map(item => item.value);
+
             const ctx = document.getElementById('usersByCategory').getContext('2d');
             if (charts.usersByCategory) charts.usersByCategory.destroy();
 
             charts.usersByCategory = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: categoryLabels,
+                    labels: sortedLabels,
                     datasets: [{
                         label: 'Number of Users',
-                        data: totals,
-                        backgroundColor: '#718096',
-                        borderColor: '#4a5568',
+                        data: sortedValues,
+                        backgroundColor: '#f56565',
+                        borderColor: '#e53e3e',
                         borderWidth: 0
                     }]
                 },
@@ -538,7 +547,7 @@
         function createProvinceComparison(province) {
             if (!province) {
                 // Show all provinces in comparison
-                const provinces = [...new Set(usageData.map(d => d.province_name))].sort().slice(0, 15);
+                const provinces = [...new Set(usageData.map(d => d.province_name))].sort();
                 const usageByProvince = provinces.map(p => {
                     const data = filterData(usageData, p);
                     return data.reduce((sum, d) => {
@@ -547,18 +556,27 @@
                     }, 0);
                 });
 
+                // Create array of {province, usage} and sort high to low
+                const sorted = provinces.map((prov, index) => ({
+                    province: prov,
+                    usage: usageByProvince[index]
+                })).sort((a, b) => b.usage - a.usage);
+
+                const sortedProvinces = sorted.map(item => item.province);
+                const sortedUsages = sorted.map(item => item.usage / 1e9);
+
                 const ctx = document.getElementById('provinceComparison').getContext('2d');
                 if (charts.provinceComparison) charts.provinceComparison.destroy();
 
                 charts.provinceComparison = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: provinces,
+                        labels: sortedProvinces,
                         datasets: [{
                             label: 'Total Usage (kWh)',
-                            data: usageByProvince.map(d => d / 1e9),
-                            backgroundColor: '#a0aec0',
-                            borderColor: '#718096',
+                            data: sortedUsages,
+                            backgroundColor: '#48bb78',
+                            borderColor: '#38a169',
                             borderWidth: 0
                         }]
                     },
@@ -612,19 +630,21 @@
                             label: 'Usage (B kWh)',
                             data: usages,
                             borderColor: '#5a67d8',
-                            backgroundColor: 'rgba(90, 103, 216, 0.05)',
+                            backgroundColor: 'rgba(90, 103, 216, 0.08)',
                             tension: 0.3,
                             fill: true,
-                            yAxisID: 'y'
+                            yAxisID: 'y',
+                            borderWidth: 2
                         },
                         {
                             label: 'Users (M)',
                             data: users,
-                            borderColor: '#a0aec0',
+                            borderColor: '#f56565',
                             backgroundColor: 'transparent',
                             tension: 0.3,
                             fill: false,
-                            yAxisID: 'y1'
+                            yAxisID: 'y1',
+                            borderWidth: 2
                         }
                     ]
                 },
